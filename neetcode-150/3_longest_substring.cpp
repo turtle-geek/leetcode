@@ -5,18 +5,18 @@ class Solution {
 public:
     int lengthOfLongestSubstring(std::string s) {
         /**
-         * Time Complexity: O(n) for left and right sliders
+         * Time Complexity: O(n) for s_pos and t sliders
          * Space Complexity: O(n) for creating the hashset
          */
 
         std::unordered_set<int> seen_char;
-        int left = 0;
-        int right = 0;
+        int s_pos = 0;
+        int t = 0;
         int max_len = 0;
         int curr_len = 0;
 
-        while(right < s.length()){
-            char curr_char = s[right];
+        while(t < s.length()){
+            char curr_char = s[t];
             if(!seen_char.contains(curr_char)){
                 seen_char.insert(curr_char);
                 curr_len++;
@@ -24,17 +24,17 @@ public:
                 if(curr_len > max_len){
                     max_len = curr_len;
                 }
-                while(s[left] != curr_char){
-                    seen_char.erase(s[left]);
-                    left++;
+                while(s[s_pos] != curr_char){
+                    seen_char.erase(s[s_pos]);
+                    s_pos++;
                     curr_len--; // off by one
                 }
-                seen_char.erase(s[left]);
-                left++;
+                seen_char.erase(s[s_pos]);
+                s_pos++;
 
                 seen_char.insert(curr_char);
             }
-            right++;
+            t++;
         }
         if(curr_len > max_len){
             max_len = curr_len;
