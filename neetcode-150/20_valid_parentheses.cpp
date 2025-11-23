@@ -1,4 +1,5 @@
 #include <stack>
+#include <unordered_map>
 
 class Solution {
 public:
@@ -7,15 +8,15 @@ public:
          * Time Complexity: O(n) for traversing through string
          * Space Complexity: O(n) for creating stack
          */
-
+        std::unordered_map<char, char> char_map = {
+            {')', '('},
+            {'}', '{'},
+            {']', '['}
+        };
         std::stack<char> p_stack;
         for(char ch : s){
             if(!p_stack.empty()){
-                if(p_stack.top() == '(' && ch == ')'){
-                    p_stack.pop();
-                } else if(p_stack.top() == '{' && ch == '}'){
-                    p_stack.pop();
-                } else if(p_stack.top() == '[' && ch == ']'){
+                if(p_stack.top() == char_map[ch]){
                     p_stack.pop();
                 } else {
                     p_stack.push(ch);

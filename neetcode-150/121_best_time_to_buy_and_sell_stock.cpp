@@ -5,7 +5,7 @@ class Solution {
 public:
     int maxProfit(std::vector<int>& prices) {
         /**
-         * Time complexity: O(n) for itera
+         * Time complexity: O(n) for iterating through array
          * Space complexity: O(1) for using constant # of variables
          */
         int l = 0;
