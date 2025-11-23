@@ -13,14 +13,15 @@ public:
             {'}', '{'},
             {']', '['}
         };
+
         std::stack<char> p_stack;
+
         for(char ch : s){
-            if(!p_stack.empty()){
-                if(p_stack.top() == char_map[ch]){
-                    p_stack.pop();
-                } else {
-                    p_stack.push(ch);
+            if(char_map.count(ch)){
+                if(p_stack.empty() || p_stack.top() != char_map[ch]){
+                    return false;
                 }
+                p_stack.pop();
             } else {
                 p_stack.push(ch);
             }
