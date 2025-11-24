@@ -5,6 +5,7 @@ public:
     bool isPalindrome(std::string s) {
         /**
          * Time Complexity: O(n) for iterating through string
+         * Space Complexity: O(n) for clean_string variable
          */
 
         std::string clean_string = "";
