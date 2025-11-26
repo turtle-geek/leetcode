@@ -1,0 +1,26 @@
+#include <vector>
+
+class Solution {
+public:
+    int search(std::vector<int>& nums, int target) {
+        /**
+         * Time Complexity: O(log(n)) for binary search divide and conquer
+         * Space Complexity: O(1) uses fixed number of variables
+         */
+        int l = 0;
+        int r = nums.size() - 1;
+        int mid;
+
+        while(l <= r){
+            mid = (l+r)/2;
+            if(target == nums[mid]){
+                return mid;
+            } else if(target > nums[mid]){
+                l = mid + 1;
+            } else {
+                r = mid - 1;
+            }
+        }
+        return -1;
+    }
+};
