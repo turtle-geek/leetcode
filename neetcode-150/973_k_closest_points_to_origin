@@ -1,0 +1,20 @@
+class Solution {
+public:
+    vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> min_heap;
+
+        for (int i = 0; i < points.size(); ++i) {
+            long long dist_sq = (long long)points[i][0] * points[i][0] + (long long)points[i][1] * points[i][1];
+            min_heap.push({dist_sq, i});
+        }
+
+        vector<vector<int>> result;
+        for (int i = 0; i < k; ++i) {
+            int index = min_heap.top().second;
+            min_heap.pop();
+            result.push_back(points[index]);
+        }
+
+        return result;
+    }
+};
