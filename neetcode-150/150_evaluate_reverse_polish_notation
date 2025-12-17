@@ -1,0 +1,34 @@
+class Solution {
+public:
+    int evalRPN(vector<string>& tokens) {
+        /**
+         * Time Complexity: O(n) for iterating through string
+         * Space Complexity: O(n) for creating stack
+         */
+        stack<long> nums;
+
+        for (const string& s : tokens) {
+            if (s == "+" || s == "-" || s == "*" || s == "/") {
+                long b = nums.top();
+                nums.pop();
+
+                long a = nums.top();
+                nums.pop();
+
+                if (s == "+"){
+                    nums.push(a + b);
+                } else if (s == "-"){
+                    nums.push(a - b);
+                } else if (s == "*"){
+                    nums.push(a * b);
+                } else if (s == "/"){
+                    nums.push(a / b);
+                }
+            }
+            else {
+                nums.push(stoi(s));
+            }
+        }
+        return (int)nums.top();
+    }
+};
