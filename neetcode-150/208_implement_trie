@@ -1,0 +1,65 @@
+class Trie {
+public:
+    Trie* children[26];
+    bool is_end;
+    Trie() {
+        // Time Complexity: O(1)
+        // Space Complexity: O(1)
+        for(int i = 0; i < 26; i++){
+            children[i] = nullptr;
+        }
+        is_end = false;
+    }
+    
+    void insert(string word) {
+        // Time Complexity: O(n) where n is size of word
+        // Space Complexity: O(n) for creating new nodes for word
+        Trie* curr = this;
+        for(char c : word){
+            int index = c - 'a';
+            if(curr->children[index] == nullptr){
+                curr->children[index] = new Trie();
+            }
+            curr = curr->children[index];
+        }
+        curr->is_end = true;
+    }
+    
+    bool search(string word) {
+        // Time Complexity: O(n) for length of search word
+        // Space Complexity: O(1) for fixed number of variables
+        Trie* curr = this;
+        for(char c : word){
+            int index = c - 'a';
+            if(curr->children[index] != nullptr){
+                curr = curr->children[index];
+            } else {
+                return false;
+            }
+        }
+        return curr->is_end;
+    }
+    
+    bool startsWith(string prefix) {
+        // Time Complexity: O(n) for length of prefix word
+        // Space Complexity: O(1) for fixed number of variables
+        Trie* curr = this;
+        for(char c : prefix){
+            int index = c - 'a';
+            if(curr->children[index] != nullptr){
+                curr = curr->children[index];
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+};
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * Trie* obj = new Trie();
+ * obj->insert(word);
+ * bool param_2 = obj->search(word);
+ * bool param_3 = obj->startsWith(prefix);
+ */
