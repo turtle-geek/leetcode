@@ -1,0 +1,26 @@
+#include <vector>
+using namespace std;
+
+class Solution {
+public:
+    vector<int> productExceptSelf(vector<int>& nums) {
+        /**
+         * Time Complexity: O(n) for iterating through array
+         * Space Complexity: O(1) for pre and post integer variables
+         */
+        vector<int> res(nums.size());
+        int pre = 1;
+        for(int i = 0; i < nums.size(); i++){
+            res[i] = pre;
+            pre *= nums[i];
+        }
+
+        int post = 1;
+        for(int j = nums.size()-1; j >= 0; j--){
+            res[j] *= post;
+            post *= nums[j];
+        }
+        
+        return res;
+    }
+};
