@@ -6,7 +6,7 @@ class Solution(object):
         """
         # Time Complexity: O(n*m) where n is the number of strings and m is len of longest string
         # Space complexity: O(n*m)
-        res = {}
+        ana_dict = {}
 
         for s in strs:
             count = [0] * 26
@@ -16,8 +16,8 @@ class Solution(object):
             
             key = tuple(count)
 
-            if key not in res:
-                res[key] = []
-            res[key].append(s)
+            if key not in ana_dict:
+                ana_dict[key] = []
+            ana_dict[key].append(s)
         
-        return list(res.values())
+        return list(ana_dict.values())
