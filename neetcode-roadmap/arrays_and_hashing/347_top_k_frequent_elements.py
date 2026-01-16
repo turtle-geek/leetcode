@@ -1,30 +1,25 @@
-class Solution(object):
+class Solution:
     def topKFrequent(self, nums, k):
         """
         :type nums: List[int]
         :type k: int
         :rtype: List[int]
         """
-        # Time Complexity: O(n) where n is number of items in buckets
-        # Space Complexity: O(n) total number of items stored in the buckets
-class Solution(object):
-    def topKFrequent(self, nums, k):
-        """
-        :type nums: List[int]
-        :type k: int
-        :rtype: List[int]
-        """
-        count = {}
-        freq = [[] for i in range(len(nums)+1)]
+        # Time Complexity: O(n) for iterating though list
+        # Space Complexity: O(n) for list, dictionary, bucket
+        freq_dict = {}
+        for num in nums:
+            freq_dict[num] = freq_dict.get(num, 0) + 1
 
-        for n in nums:
-            count[n] = 1 + count.get(n, 0)
-        for n, c in count.items():
-            freq[c].append(n)
+        bucket = [[] for _ in range(len(nums) + 1)]
+        for num, freq in freq_dict.items():
+            bucket[freq].append(num)
         
-        k_freq = []
-        for i in range(len(freq) - 1, 0, -1):
-            for n in freq[i]:
-                k_freq.append(n)
-                if len(k_freq) == k:
-                    return k_freq
+        res = []
+        for i in range(len(bucket) - 1, 0, -1):
+            for n in bucket[i]:
+                res.append(n)
+                if(len(res) == k):
+                    return res
+        return res
+
