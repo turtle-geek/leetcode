@@ -4,22 +4,23 @@ class Solution(object):
         :type nums: List[int]
         :rtype: int
         """
-        # Time Complexity: O(n) for iterating through nums
-        # Space Complexity: O(n) for creating set
+        # Time Complexity: O(n) for iterating through the set
+        # Space Complexity: O(n) for storing the list elements
         if not nums:
             return 0
-        
+
         num_set = set(nums)
-        longest_streak = 0
+        max_count = 0
 
         for num in num_set:
-            if num - 1 not in num_set:
-                current_num = num
-                current_streak = 1
-                while current_num + 1 in num_set:
-                    current_streak +=1
-                    current_num += 1
-                longest_streak = max(longest_streak, current_streak)
-                
-        return longest_streak
+            if (num - 1) not in num_set:
+                search_val = num
+                count = 1
+
+                while search_val + 1 in num_set:
+                    count += 1
+                    search_val += 1
+                max_count = max(max_count, count)
+        
+        return max_count
             
