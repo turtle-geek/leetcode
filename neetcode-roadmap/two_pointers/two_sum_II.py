@@ -5,17 +5,16 @@ class Solution(object):
         :type target: int
         :rtype: List[int]
         """
-        # Time Complexity: O(n) for left and right pointer traversal
+        # Time Complexity: O(n) for left and right pointers moving through list
         # Space Complexity: O(1) for fixed number of variables
-        left = 0
-        right = len(numbers) - 1
+        l = 0
+        r = len(numbers) - 1
 
-        while left < right:
-            curr_sum = numbers[left] + numbers[right]
-            if curr_sum == target:
-                return[left + 1, right + 1]
-            elif curr_sum < target:
-                left += 1
+        while l < r:
+            curr = numbers[l] + numbers[r]
+            if curr > target:
+                r -= 1
+            elif curr < target:
+                l += 1
             else:
-                right -= 1
-        return []
+                return [l + 1, r + 1]
