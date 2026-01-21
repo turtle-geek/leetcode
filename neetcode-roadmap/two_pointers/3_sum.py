@@ -5,24 +5,21 @@ class Solution(object):
         :rtype: List[List[int]]
         """
         # Time Complexity: O(n^2)
-        # Space Complexity: O(n)
-        res = []
+        # Space Complexity: O(n) for result set
+        res = set()
         nums.sort()
-
-        for i, a in enumerate(nums):
-            if i > 0 and a == nums[i - 1]:
-                continue
-
-            l, r = i + 1, len(nums) - 1
-            while l < r:
-                threeSum = a + nums[l] + nums[r]
-                if threeSum > 0:
-                    r -= 1
-                elif threeSum < 0:
-                    l += 1
-                else:
-                    res.append([a, nums[l], nums[r]])
-                    l += 1
-                    while nums[l] == nums[l - 1] and l < r:
-                        l += 1
-        return res
+        
+        for i in range(len(nums)):
+            if nums[i] > 0: break 
+            if i > 0 and nums[i] == nums[i-1]: continue
+            
+            target = -nums[i]
+            seen = set()
+            
+            for j in range(i + 1, len(nums)):
+                complement = target - nums[j]
+                if complement in seen:
+                    res.add((nums[i], complement, nums[j]))
+                seen.add(nums[j])
+                
+        return [list(t) for t in res]
