@@ -5,23 +5,35 @@ class Solution(object):
         :rtype: List[List[int]]
         """
         # Time Complexity: O(n^2)
-        # Space Complexity: O(n) for result set
-        res = set()
+        # Space Complexity: O(n) for result list
+        res = []
         nums.sort()
         
         for i in range(len(nums)):
             if nums[i] > 0:
-                break 
+                break
             if i > 0 and nums[i] == nums[i-1]:
                 continue
             
-            target = -nums[i]
-            seen = set()
+            l = i + 1
+            r = len(nums) - 1
             
-            for j in range(i + 1, len(nums)):
-                complement = target - nums[j]
-                if complement in seen:
-                    res.add((nums[i], complement, nums[j]))
-                seen.add(nums[j])
+            while l < r:
+                three_sum = nums[i] + nums[l] + nums[r]
+
+                if three_sum > 0:
+                    r -= 1
+                elif three_sum < 0:
+                    l += 1
+                else:
+                    res.append([nums[i], nums[l], nums[r]])
+
+                    while l < r and nums[l] == nums[l + 1]:
+                        l += 1
+                    while l < r and nums[r] == nums[r - 1]:
+                        r -= 1
+                    
+                    l += 1
+                    r -= 1
                 
-        return [list(t) for t in res]
+        return res
