@@ -4,20 +4,24 @@ class Solution(object):
         :type height: List[int]
         :rtype: int
         """
-        # Time complexity: O(n) for sliding window
+        # Time complexity: O(n) for two pointers
         # Space complexity: O(1) for fixed number of variables
-        max_val = 0
-        left = 0
-        right = len(height) - 1
+        l = 0
+        r = len(height) - 1
 
-        while left < right:
-            width = right - left
-            area = width * min(height[left], height[right])
+        max_area = 0
 
-            max_val = max(max_val, area)
-            if height[left] < height[right]:
-                left += 1
+        while l < r:
+            h_l = height[l]
+            h_r = height[r]
+
+            if h_l < h_r:
+                area = h_l * (r - l)
+                l += 1
             else:
-                right -= 1
+                area = h_r * (r - l)
+                r -= 1
+                
+            max_area = max(max_area, area)
 
-        return max_val
+        return max_area
