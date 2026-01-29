@@ -4,21 +4,21 @@ class Solution(object):
         :type height: List[int]
         :rtype: int
         """
+        # Time Complexity: O(n) for left and right pointers
+        # Space Complexity: O(1) for fixed number of variables
         if not height:
             return 0
 
-        left, right = 0, len(height) - 1
-        left_max, right_max = height[left], height[right]
+        left = 0
+        right = len(height) - 1
+        left_max = height[left]
+        right_max = height[right]
         water = 0
 
         while left < right:
-            # We move the side that is lower because that side 
-            # is the "bottleneck" for the water level
             if left_max < right_max:
                 left += 1
                 left_max = max(left_max, height[left])
-                # Water trapped is the difference between the max 
-                # wall and the current floor
                 water += left_max - height[left]
             else:
                 right -= 1
