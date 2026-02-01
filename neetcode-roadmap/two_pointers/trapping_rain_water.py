@@ -6,6 +6,7 @@ class Solution(object):
         """
         # Time Complexity: O(n) for left and right pointers
         # Space Complexity: O(1) for fixed number of variables
+        
         if not height:
             return 0
 
@@ -22,7 +23,7 @@ class Solution(object):
                 water += left_max - height[left]
             else:
                 right -= 1
-                right_max = max(right_max, height[right])
+                right_max = max(right_max, height[right]) 
                 water += right_max - height[right]
         
         return water
