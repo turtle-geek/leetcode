@@ -4,12 +4,11 @@ class Solution(object):
         :type height: List[int]
         :rtype: int
         """
-        # Time Complexity: O(n) for left and right pointers
+        # Time Complexity: O(n) for left and right pointer iteration
         # Space Complexity: O(1) for fixed number of variables
-        
         if not height:
             return 0
-
+        
         left = 0
         right = len(height) - 1
         left_max = height[left]
@@ -23,7 +22,6 @@ class Solution(object):
                 water += left_max - height[left]
             else:
                 right -= 1
-                right_max = max(right_max, height[right]) 
+                right_max = max(right_max, height[right])
                 water += right_max - height[right]
-        
         return water
