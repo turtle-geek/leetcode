@@ -4,7 +4,8 @@ class Solution(object):
         :type tokens: List[str]
         :rtype: int
         """
-        # Time complexity: O(n) for 
+        # Time complexity: O(n) for iterating through tokens
+        # Space complexity: O(1) for the stack always at most 2 numbers in the stack
         stack = []
         for c in tokens:
             if c == "+":
