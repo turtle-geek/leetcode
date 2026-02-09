@@ -8,7 +8,7 @@ class Solution(object):
         # Space Complexity: O(n) for result array
         stack = []
         n = len(temperatures)
-        res = [0]*n
+        res = [0] * n
 
         for i in range(n):
             while stack and temperatures[i] > temperatures[stack[-1]]:
