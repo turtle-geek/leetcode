@@ -8,13 +8,13 @@ class Solution(object):
         """
         # Time complexity: O(n) for iterating through position and speed
         # Space complexity: O(n) for all elements in stack in worst case
-        car = sorted(zip(position, speed), reverse=True)
-        stack = []
+        cars = sorted(zip(position, speed), reverse=True)
+        fleets = 0
+        last_fleet_time = 0.0
 
-        for p, s in car:
-            time = (target - p)/float(s)
-            if not stack or time > stack[-1]:
-                stack.append(time)
-
-        return len(stack)
-        
+        for p, s in cars:
+            time = float(target - p) / s
+            if time > last_fleet_time:
+                fleets += 1
+                last_fleet_time = time
+        return fleets
