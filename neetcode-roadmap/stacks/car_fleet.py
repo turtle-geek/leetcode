@@ -13,7 +13,7 @@ class Solution(object):
         last_fleet_time = 0.0
 
         for p, s in cars:
-            time = float(target - p)/s
+            time = float(target - p) / s
             if time > last_fleet_time:
                 fleets += 1
                 last_fleet_time = time
