@@ -16,14 +16,14 @@ class Solution(object):
             if nums[left] <= nums[mid]:
                 # Left half is sorted
                 if nums[left] <= target < nums[mid]:
-                    right = mid - 1 # Target is in the sorted left half
+                    right = mid - 1
                 else:
-                    left = mid + 1  # Target must be in the right half
+                    left = mid + 1
             else:
                 # Right half is sorted
                 if nums[mid] < target <= nums[right]:
-                    left = mid + 1  # Target is in the sorted right half
+                    left = mid + 1
                 else:
-                    right = mid - 1 # Target must be in the left half
+                    right = mid - 1
                     
         return -1
