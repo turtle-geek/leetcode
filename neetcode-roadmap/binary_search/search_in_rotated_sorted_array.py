@@ -12,17 +12,22 @@ class Solution(object):
             if nums[mid] == target:
                 return mid
             
-            # Identify which half is sorted
+            # Left half is sorted properly
             if nums[left] <= nums[mid]:
-                # Left half is sorted
+                # Is the target within that sorted left half?
                 if nums[left] <= target < nums[mid]:
+                    # Narrow down search even more
                     right = mid - 1
                 else:
+                    # Ignore this half of the array from now on
                     left = mid + 1
+            # Left half is not sorted correctly bleeding of larger values from the end
+            # If the left half is not sorted correctly then the right half must be sorted right
             else:
-                # Right half is sorted
+                # Ignore the first half if the target is in the second half
                 if nums[mid] < target <= nums[right]:
                     left = mid + 1
+                # Narrow down to first half
                 else:
                     right = mid - 1
                     
