@@ -14,7 +14,7 @@ class Solution(object):
             
             # Left half is sorted properly
             if nums[left] <= nums[mid]:
-                # Is the target within that sorted left half?
+                # Is the target within that sorted left half
                 if nums[left] <= target < nums[mid]:
                     # Narrow down search even more
                     right = mid - 1
