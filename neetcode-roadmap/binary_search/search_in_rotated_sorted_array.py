@@ -30,5 +30,4 @@ class Solution(object):
                 # Narrow down to first half
                 else:
                     right = mid - 1
-                    
         return -1
