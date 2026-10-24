@@ -16,5 +16,5 @@ class Solution(object):
             if prices[left] <= prices[right]:
                 right += 1
             else:
-                left += 1
+                left = right
         return maxProfit
