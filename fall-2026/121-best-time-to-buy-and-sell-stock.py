@@ -13,8 +13,7 @@ class Solution(object):
             curProfit = prices[right] - prices[left]
             if curProfit > maxProfit:
                 maxProfit = curProfit
-            if prices[left] <= prices[right]:
-                right += 1
-            else:
+            if prices[left] > prices[right]:
                 left = right
+            right += 1
         return maxProfit
