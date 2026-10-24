@@ -4,7 +4,7 @@ class Solution(object):
         :type prices: List[int]
         :rtype: int
         """
-        # Time Complexity: O(n) access every element twice at most
+        # Time Complexity: O(n) one pass through the list
         # Memory: O(1) pointers and ints are the only thing you store
         left = 0
         right = 1
