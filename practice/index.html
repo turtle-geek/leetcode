@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Premium Practice</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+<style>
+  :root {
+    --bg: #1a1a1a; --panel: #262626; --panel2: #2f2f2f; --line: #3a3a3a;
+    --text: #e6e6e6; --muted: #a3a3a3; --easy: #00b8a3; --medium: #ffc01e; --hard: #ff375f;
+    --green: #2cbb5d; --red: #f8615c; --accent: #f0a04b;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.6 -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+         display: flex; flex-direction: column; overflow: hidden; }
+  header { height: 48px; display: flex; align-items: center; gap: 6px; padding: 0 12px; background: var(--panel);
+           border-bottom: 1px solid var(--line); flex: none; }
+  header .brand { font-weight: 700; margin-right: 12px; white-space: nowrap; }
+  #tabs { display: flex; gap: 6px; overflow-x: auto; min-width: 0; flex: 1; scrollbar-width: thin; }
+  .tab { background: transparent; color: var(--muted); border: 1px solid transparent; border-radius: 6px; padding: 5px 10px;
+         cursor: pointer; font: inherit; white-space: nowrap; }
+  .tab:hover { background: var(--panel2); color: var(--text); }
+  .tab.active { background: var(--panel2); color: var(--text); border-color: var(--line); }
+  .tab .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .tab .done { color: var(--green); margin-left: 5px; }
+  #status { margin-left: auto; color: var(--muted); font-size: 12px; white-space: nowrap; }
+  main { flex: 1; display: flex; min-height: 0; padding: 8px; gap: 0; }
+  #left { width: 44%; background: var(--panel); border-radius: 8px; overflow: auto; padding: 18px 22px; min-width: 240px; }
+  #gutter { width: 8px; cursor: col-resize; flex: none; }
+  #gutter:hover { background: #3a3a3a55; border-radius: 4px; }
+  #right { flex: 1; display: flex; flex-direction: column; min-width: 300px; gap: 8px; }
+  .card { background: var(--panel); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+  #editorCard { flex: 1; min-height: 0; }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--line); flex: none; }
+  .bar .lang { color: var(--muted); font-size: 12px; }
+  .bar .spacer { flex: 1; }
+  .btn { border: none; border-radius: 6px; padding: 6px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn.ghost { background: transparent; color: var(--muted); font-weight: 400; padding: 6px 8px; }
+  .btn.ghost:hover:not(:disabled) { color: var(--text); background: var(--panel2); }
+  .btn.run { background: var(--panel2); color: var(--text); }
+  .btn.run:hover:not(:disabled) { background: #3d3d3d; }
+  .btn.submit { background: var(--green); color: #fff; }
+  .btn.submit:hover:not(:disabled) { background: #26a650; }
+  .CodeMirror { height: 100%; font: 14px/1.55 "JetBrains Mono", Menlo, Consolas, monospace; background: var(--panel) !important; }
+  .CodeMirror-gutters { background: var(--panel) !important; border-right: 1px solid var(--line) !important; }
+  #editorWrap { flex: 1; min-height: 0; }
+  #consoleCard { height: 38%; min-height: 120px; }
+  #console { padding: 12px 16px; overflow: auto; flex: 1; }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  .meta { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .pill { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: var(--panel2); color: var(--muted); }
+  .pill.Easy { color: var(--easy); } .pill.Medium { color: var(--medium); } .pill.Hard { color: var(--hard); }
+  #desc code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  #desc pre.example { background: var(--panel2); border-left: 3px solid var(--line); padding: 10px 12px; border-radius: 6px;
+                      white-space: pre-wrap; word-break: break-all; font: 13px/1.6 "JetBrains Mono", Menlo, Consolas, monospace; }
+  .ex-title { font-weight: 700; margin: 18px 0 6px; }
+  details { margin-top: 18px; background: var(--panel2); border-radius: 6px; padding: 8px 12px; }
+  summary { cursor: pointer; color: var(--muted); }
+  #solution { white-space: pre; overflow: auto; background: var(--panel2); padding: 10px 12px; border-radius: 6px;
+              font: 13px/1.55 "JetBrains Mono", Menlo, Consolas, monospace; display: none; margin-top: 10px; }
+  .res-head { font-size: 18px; font-weight: 700; }
+  .ok { color: var(--green); } .bad { color: var(--red); } .warn { color: var(--medium); }
+  .sub { color: var(--muted); font-size: 12px; margin-left: 8px; font-weight: 400; }
+  .case { margin-top: 12px; }
+  .case .lbl { color: var(--muted); font-size: 12px; margin: 8px 0 3px; }
+  .case pre { margin: 0; background: var(--panel2); padding: 8px 10px; border-radius: 6px; white-space: pre-wrap;
+              word-break: break-all; font: 13px/1.5 "JetBrains Mono", Menlo, Consolas, monospace; }
+  .casetabs { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .casetab { background: var(--panel2); border: 1px solid transparent; color: var(--text); border-radius: 6px; padding: 3px 10px;
+             cursor: pointer; font: inherit; font-size: 13px; }
+  .casetab.active { border-color: var(--line); background: #3a3a3a; }
+  .hintline { color: var(--muted); }
+  kbd { background: var(--panel2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">Premium Practice</span>
+  <nav id="tabs"></nav>
+  <span id="status">Loading Python…</span>
+</header>
+<main>
+  <section id="left">
+    <h1 id="title"></h1>
+    <div class="meta" id="meta"></div>
+    <div id="desc"></div>
+    <details><summary>Hint</summary><p id="hint"></p></details>
+    <details id="solBox"><summary>Solution</summary>
+      <p class="hintline">Try for at least 15 minutes before looking.</p>
+      <button class="btn run" id="showSol">Show reference solution</button>
+      <pre id="solution"></pre>
+    </details>
+  </section>
+  <div id="gutter"></div>
+  <section id="right">
+    <div class="card" id="editorCard">
+      <div class="bar">
+        <span class="lang">Python 3</span>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="reset" title="Reset to the starter code">Reset</button>
+        <button class="btn run" id="runBtn" disabled title="Run the examples (Ctrl+')">Run</button>
+        <button class="btn submit" id="submitBtn" disabled title="Run every test (Ctrl+Enter)">Submit</button>
+      </div>
+      <div id="editorWrap"><textarea id="code"></textarea></div>
+    </div>
+    <div class="card" id="consoleCard">
+      <div class="bar"><span class="lang">Test results</span></div>
+      <div id="console">
+        <p class="hintline"><b>Run</b> checks the examples. <b>Submit</b> runs every test: examples, edge cases, 100 random tests and a large input.
+        Shortcuts: <kbd>Ctrl</kbd>+<kbd>'</kbd> to run, <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to submit. Your code is saved in this browser automatically.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="application/json" id="data">[{"id": "317", "title": "317. Shortest Distance from All Buildings", "difficulty": "Hard", "tags": ["Grid BFS"], "kind": "function", "starter": "class Solution:\n    def shortestDistance(self, grid: List[List[int]]) -> int:\n        ", "ref": "\nfrom collections import deque\nclass Solution:\n    def shortestDistance(self, grid):\n        m, n = len(grid), len(grid[0])\n        total = [[0] * n for _ in range(m)]\n        reach = [[0] * n for _ in range(m)]\n        buildings = 0\n        for i in range(m):\n            for j in range(n):\n                if grid[i][j] != 1:\n                    continue\n                buildings += 1\n                seen = [[False] * n for _ in range(m)]\n                q = deque([(i, j, 0)])\n                while q:\n                    x, y, d = q.popleft()\n                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n                        a, b = x + dx, y + dy\n                        if 0 <= a < m and 0 <= b < n and not seen[a][b] and grid[a][b] == 0:\n                            seen[a][b] = True\n                            total[a][b] += d + 1\n                            reach[a][b] += 1\n                            q.append((a, b, d + 1))\n        best = [total[i][j] for i in range(m) for j in range(n)\n                if grid[i][j] == 0 and reach[i][j] == buildings]\n        return min(best) if best else -1\n", "brute": "\nfrom collections import deque\nclass Solution:\n    def shortestDistance(self, grid):\n        m, n = len(grid), len(grid[0])\n        nb = sum(row.count(1) for row in grid)\n        best = -1\n        for si in range(m):\n            for sj in range(n):\n                if grid[si][sj] != 0:\n                    continue\n                dist = {(si, sj): 0}\n                q = deque([(si, sj)])\n                total, found = 0, set()\n                while q:\n                    x, y = q.popleft()\n                    for a, b in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):\n                        if not (0 <= a < m and 0 <= b < n) or (a, b) in dist:\n                            continue\n                        if grid[a][b] == 1:\n                            if (a, b) not in found:\n                                found.add((a, b))\n                                total += dist[(x, y)] + 1\n                        elif grid[a][b] == 0:\n                            dist[(a, b)] = dist[(x, y)] + 1\n                            q.append((a, b))\n                if len(found) == nb and (best == -1 or total < best):\n                    best = total\n        return best\n", "gen": "\ndef gen(rng):\n    m, n = rng.randint(1, 6), rng.randint(1, 6)\n    g = [[rng.choice([0, 0, 0, 1, 2]) for _ in range(n)] for _ in range(m)]\n    if not any(1 in row for row in g):\n        g[rng.randrange(m)][rng.randrange(n)] = 1\n    return [g]\n\ndef perf(rng):\n    m = n = 50\n    g = [[2 if rng.random() < 0.15 else 0 for _ in range(n)] for _ in range(m)]\n    for _ in range(12):\n        g[rng.randrange(m)][rng.randrange(n)] = 1\n    return [g]\n", "stress": 100, "perf": 1, "tests": [{"name": "Example 1", "example": true, "args": [[[1, 0, 0, 0, 1], [0, 0, 2, 0, 0], [0, 0, 1, 0, 0]]], "expected": 7}, {"name": "Example 2", "example": true, "args": [[[1, 0]]], "expected": 1}, {"name": "Example 3", "example": true, "args": [[[1, 2], [2, 0]]], "expected": -1}, {"name": "Only a building", "args": [[[1]]], "expected": -1}, {"name": "Building walled off by obstacles", "args": [[[1, 0, 0], [2, 2, 2], [0, 0, 1]]], "expected": -1}, {"name": "Building blocks the only path", "args": [[[0, 1, 0, 1]]], "expected": 2}, {"name": "Two equally good spots", "args": [[[1, 0, 0, 1]]], "expected": 3}, {"name": "Single column", "args": [[[1], [0], [0], [1]]], "expected": 3}, {"name": "No empty land", "args": [[[1, 2], [2, 1]]], "expected": -1}], "hint": "Run a BFS from each building instead of from each empty cell. For every empty cell, keep the running total of distances and how many buildings reached it. Only cells reached by all buildings count.", "method": "shortestDistance", "cls": null, "params": ["grid"], "description": "\n<p>You're given an <code>m x n<\/code> grid where each cell is one of:<\/p>\n<ul>\n<li><code>0<\/code>: empty land you can walk through<\/li>\n<li><code>1<\/code>: a building (you can't walk through it)<\/li>\n<li><code>2<\/code>: an obstacle (you can't walk through it)<\/li>\n<\/ul>\n<p>You want to build a house on one empty cell so that the <b>total travel distance<\/b> to every building is as small as possible.\nThe travel distance from the house to a building is the length of the shortest path that moves up, down, left or right through\nempty cells only, with the final step landing on the building.<\/p>\n<p>Return the smallest total travel distance. If no empty cell can reach <b>every<\/b> building, return <code>-1<\/code>.<\/p>\n<p class=\"ex-title\">Example 1:<\/p><pre class=\"example\"><b>Input:<\/b> grid = [[1, 0, 0, 0, 1], [0, 0, 2, 0, 0], [0, 0, 1, 0, 0]]\n<b>Output:<\/b> 7<\/pre><p class=\"ex-title\">Example 2:<\/p><pre class=\"example\"><b>Input:<\/b> grid = [[1, 0]]\n<b>Output:<\/b> 1<\/pre><p class=\"ex-title\">Example 3:<\/p><pre class=\"example\"><b>Input:<\/b> grid = [[1, 2], [2, 0]]\n<b>Output:<\/b> -1<\/pre><p class='ex-title'>Constraints:<\/p><ul><li><code>1 &lt;= m, n &lt;= 50<\/code><\/li><li><code>grid[i][j] is 0, 1 or 2<\/code><\/li><li><code>There is at least one building<\/code><\/li><\/ul>"}, {"id": "1166", "title": "1166. Design File System", "difficulty": "Medium", "tags": ["Design", "Hash map"], "kind": "design", "starter": "class FileSystem:\n\n    def __init__(self):\n        \n\n    def createPath(self, path: str, value: int) -> bool:\n        \n\n    def get(self, path: str) -> int:\n        \n", "ref": "\nclass FileSystem:\n    def __init__(self):\n        self.paths = {}\n    def createPath(self, path, value):\n        if path in self.paths:\n            return False\n        parent = path[:path.rfind(\"/\")]\n        if parent and parent not in self.paths:\n            return False\n        self.paths[path] = value\n        return True\n    def get(self, path):\n        return self.paths.get(path, -1)\n", "brute": "\nclass FileSystem:\n    def __init__(self):\n        self.items = []\n    def _find(self, path):\n        for p, v in self.items:\n            if p == path:\n                return v\n        return None\n    def createPath(self, path, value):\n        parts = path.split(\"/\")[1:]\n        if self._find(path) is not None:\n            return False\n        if len(parts) > 1 and self._find(\"/\" + \"/\".join(parts[:-1])) is None:\n            return False\n        self.items.append((path, value))\n        return True\n    def get(self, path):\n        v = self._find(path)\n        return -1 if v is None else v\n", "gen": "\nPOOL = [\"/a\", \"/b\", \"/a/b\", \"/a/c\", \"/b/a\", \"/a/b/c\", \"/c/d\", \"/a/b/c/d\", \"/b/a/z\"]\ndef gen(rng):\n    ops, args = [\"FileSystem\"], [[]]\n    for _ in range(rng.randint(1, 14)):\n        p = rng.choice(POOL)\n        if rng.random() < 0.6:\n            ops.append(\"createPath\"); args.append([p, rng.randint(1, 99)])\n        else:\n            ops.append(\"get\"); args.append([p])\n    return ops, args\n", "stress": 100, "perf": 0, "tests": [{"name": "Example 1", "example": true, "ops": ["FileSystem", "createPath", "get"], "args": [[], ["/home", 3], ["/home"]], "expected": [null, true, 3]}, {"name": "Example 2", "example": true, "ops": ["FileSystem", "createPath", "createPath", "get", "createPath", "get"], "args": [[], ["/app", 1], ["/app/src", 2], ["/app/src"], ["/lib/util", 4], ["/lib"]], "expected": [null, true, true, 2, false, -1]}, {"name": "Same path twice", "ops": ["FileSystem", "createPath", "createPath", "get"], "args": [[], ["/x", 1], ["/x", 2], ["/x"]], "expected": [null, true, false, 1]}, {"name": "Child before parent", "ops": ["FileSystem", "createPath", "createPath", "createPath", "get"], "args": [[], ["/a/b", 5], ["/a", 1], ["/a/b", 5], ["/a/b"]], "expected": [null, false, true, true, 5]}, {"name": "Get missing path", "ops": ["FileSystem", "get"], "args": [[], ["/nothing"]], "expected": [null, -1]}, {"name": "Deep chain", "ops": ["FileSystem", "createPath", "createPath", "createPath", "createPath", "get", "get"], "args": [[], ["/a", 1], ["/a/b", 2], ["/a/b/c", 3], ["/a/b/c/d", 4], ["/a/b/c/d"], ["/a/b/c"]], "expected": [null, true, true, true, true, 4, 3]}, {"name": "Similar names", "ops": ["FileSystem", "createPath", "createPath", "createPath", "get"], "args": [[], ["/ab", 1], ["/a/b", 2], ["/ab/c", 3], ["/ab/c"]], "expected": [null, true, false, true, 3]}], "hint": "A dict from full path to value is enough. The parent is everything before the last '/'. If that's an empty string, the path is top-level.", "method": null, "cls": "FileSystem", "params": [], "description": "\n<p>Build a file system where every path stores an integer. A path is one or more names joined by slashes, such as\n<code>/app<\/code> or <code>/app/src<\/code>. Each name is made of lowercase letters.<\/p>\n<p>Implement the <code>FileSystem<\/code> class:<\/p>\n<ul>\n<li><code>createPath(path, value)<\/code>: store <code>value<\/code> at <code>path<\/code> and return <code>True<\/code>.\nReturn <code>False<\/code> (and store nothing) if the path already exists, or if its <b>parent<\/b> doesn't exist.\nThe parent of <code>/app/src<\/code> is <code>/app<\/code>. A top-level path like <code>/app<\/code> has no parent to check.<\/li>\n<li><code>get(path)<\/code>: return the value stored at <code>path<\/code>, or <code>-1<\/code> if it doesn't exist.<\/li>\n<\/ul>\n<p>Tests call your methods in order, the same way LeetCode does: the first list is the method names,\nthe second is each call's arguments, and the output lists each call's return value (<code>null<\/code> for the constructor).<\/p>\n<p class=\"ex-title\">Example 1:<\/p><pre class=\"example\"><b>Input:<\/b>\n[\"FileSystem\", \"createPath\", \"get\"]\n[[], [\"/home\", 3], [\"/home\"]]\n<b>Output:<\/b>\n[null, true, 3]<\/pre><p class=\"ex-title\">Example 2:<\/p><pre class=\"example\"><b>Input:<\/b>\n[\"FileSystem\", \"createPath\", \"createPath\", \"get\", \"createPath\", \"get\"]\n[[], [\"/app\", 1], [\"/app/src\", 2], [\"/app/src\"], [\"/lib/util\", 4], [\"/lib\"]]\n<b>Output:<\/b>\n[null, true, true, 2, false, -1]<\/pre><p class='ex-title'>Constraints:<\/p><ul><li><code>Up to 10<sup>4<\/sup> calls in total<\/code><\/li><li><code>2 &lt;= path.length &lt;= 100<\/code><\/li><li><code>1 &lt;= value &lt;= 10<sup>9<\/sup><\/code><\/li><\/ul>"}, {"id": "588", "title": "588. Design In-Memory File System", "difficulty": "Hard", "tags": ["Design", "Trie"], "kind": "design", "starter": "class FileSystem:\n\n    def __init__(self):\n        \n\n    def ls(self, path: str) -> List[str]:\n        \n\n    def mkdir(self, path: str) -> None:\n        \n\n    def addContentToFile(self, filePath: str, content: str) -> None:\n        \n\n    def readContentFromFile(self, filePath: str) -> str:\n        \n", "ref": "\nclass FileSystem:\n    def __init__(self):\n        self.root = {\"dirs\": {}, \"files\": {}}\n    def _walk(self, parts, create=False):\n        node = self.root\n        for p in parts:\n            if p not in node[\"dirs\"]:\n                if not create:\n                    return None\n                node[\"dirs\"][p] = {\"dirs\": {}, \"files\": {}}\n            node = node[\"dirs\"][p]\n        return node\n    def ls(self, path):\n        parts = [p for p in path.split(\"/\") if p]\n        if parts:\n            parent = self._walk(parts[:-1])\n            if parent is not None and parts[-1] in parent[\"files\"]:\n                return [parts[-1]]\n        node = self._walk(parts)\n        return sorted(list(node[\"dirs\"]) + list(node[\"files\"]))\n    def mkdir(self, path):\n        self._walk([p for p in path.split(\"/\") if p], create=True)\n    def addContentToFile(self, filePath, content):\n        parts = [p for p in filePath.split(\"/\") if p]\n        node = self._walk(parts[:-1], create=True)\n        node[\"files\"][parts[-1]] = node[\"files\"].get(parts[-1], \"\") + content\n    def readContentFromFile(self, filePath):\n        parts = [p for p in filePath.split(\"/\") if p]\n        return self._walk(parts[:-1])[\"files\"][parts[-1]]\n", "brute": "\nclass FileSystem:\n    def __init__(self):\n        self.dirs = {\"/\"}\n        self.files = {}\n    def _parents(self, path):\n        parts = path.strip(\"/\").split(\"/\")\n        return [\"/\" + \"/\".join(parts[:i]) for i in range(1, len(parts))]\n    def ls(self, path):\n        if path in self.files:\n            return [path.rsplit(\"/\", 1)[1]]\n        prefix = path.rstrip(\"/\") + \"/\"\n        kids = set()\n        for p in list(self.dirs) + list(self.files):\n            if p != \"/\" and p.startswith(prefix) and \"/\" not in p[len(prefix):]:\n                kids.add(p[len(prefix):])\n        return sorted(kids)\n    def mkdir(self, path):\n        self.dirs.update(self._parents(path))\n        self.dirs.add(path)\n    def addContentToFile(self, filePath, content):\n        self.dirs.update(self._parents(filePath))\n        self.files[filePath] = self.files.get(filePath, \"\") + content\n    def readContentFromFile(self, filePath):\n        return self.files[filePath]\n", "gen": "\nNAMES = [\"a\", \"b\", \"c\", \"ab\", \"ba\", \"z\"]\ndef gen(rng):\n    dirs, files = {\"/\"}, set()\n    def parents(p):\n        parts = p.strip(\"/\").split(\"/\")\n        return [\"/\" + \"/\".join(parts[:i]) for i in range(1, len(parts))]\n    def rand_path():\n        return \"/\" + \"/\".join(rng.choice(NAMES) for _ in range(rng.randint(1, 3)))\n    ops, args = [\"FileSystem\"], [[]]\n    for _ in range(rng.randint(1, 16)):\n        r = rng.random()\n        if r < 0.3:\n            p = rand_path()\n            if p in files or any(q in files for q in parents(p)):\n                continue\n            dirs.update(parents(p)); dirs.add(p)\n            ops.append(\"mkdir\"); args.append([p])\n        elif r < 0.6:\n            p = rand_path()\n            if p in dirs or any(q in files for q in parents(p)):\n                continue\n            dirs.update(parents(p)); files.add(p)\n            ops.append(\"addContentToFile\"); args.append([p, rng.choice([\"x\", \"hi\", \"abc\", \" \"])])\n        elif r < 0.8 and files:\n            ops.append(\"readContentFromFile\"); args.append([rng.choice(sorted(files))])\n        else:\n            ops.append(\"ls\"); args.append([rng.choice(sorted(dirs | files))])\n    return ops, args\n", "stress": 100, "perf": 0, "tests": [{"name": "Example 1", "example": true, "ops": ["FileSystem", "mkdir", "addContentToFile", "ls", "ls", "readContentFromFile"], "args": [[], ["/docs/notes"], ["/docs/todo", "buy milk"], ["/docs"], ["/docs/todo"], ["/docs/todo"]], "expected": [null, null, null, ["notes", "todo"], ["todo"], "buy milk"]}, {"name": "Example 2", "example": true, "ops": ["FileSystem", "ls", "addContentToFile", "addContentToFile", "readContentFromFile", "ls"], "args": [[], ["/"], ["/a", "hi"], ["/a", " there"], ["/a"], ["/"]], "expected": [null, [], null, null, "hi there", ["a"]]}, {"name": "Empty root", "ops": ["FileSystem", "ls"], "args": [[], ["/"]], "expected": [null, []]}, {"name": "ls sorts names", "ops": ["FileSystem", "mkdir", "mkdir", "addContentToFile", "mkdir", "ls"], "args": [[], ["/zoo"], ["/apple"], ["/mid", "m"], ["/ab"], ["/"]], "expected": [null, null, null, null, null, ["ab", "apple", "mid", "zoo"]]}, {"name": "mkdir creates parents", "ops": ["FileSystem", "mkdir", "ls", "ls", "ls"], "args": [[], ["/a/b/c"], ["/"], ["/a"], ["/a/b"]], "expected": [null, null, ["a"], ["b"], ["c"]]}, {"name": "File inside new directories", "ops": ["FileSystem", "addContentToFile", "ls", "ls", "readContentFromFile"], "args": [[], ["/x/y/f", "data"], ["/x"], ["/x/y/f"], ["/x/y/f"]], "expected": [null, null, ["y"], ["f"], "data"]}, {"name": "mkdir twice", "ops": ["FileSystem", "mkdir", "addContentToFile", "mkdir", "ls"], "args": [[], ["/d"], ["/d/f", "1"], ["/d"], ["/d"]], "expected": [null, null, null, null, ["f"]]}, {"name": "Empty directory", "ops": ["FileSystem", "mkdir", "ls"], "args": [[], ["/e"], ["/e"]], "expected": [null, null, []]}], "hint": "Model it as a tree, like a trie: each directory node holds a dict of child directories and a dict of file name to content. Split the path on '/' and walk down.", "method": null, "cls": "FileSystem", "params": [], "description": "\n<p>Build an in-memory file system with directories and files. Paths are absolute and start with <code>/<\/code>;\n<code>/<\/code> on its own is the root directory. Names are made of lowercase letters.<\/p>\n<p>Implement the <code>FileSystem<\/code> class:<\/p>\n<ul>\n<li><code>ls(path)<\/code>: if <code>path<\/code> is a file, return a list containing only that file's name.\nIf it's a directory, return the names of all files and directories <b>directly inside<\/b> it, sorted in lexicographic order.<\/li>\n<li><code>mkdir(path)<\/code>: create the directory <code>path<\/code>, creating any missing parent directories along the way.\nIf it already exists, do nothing.<\/li>\n<li><code>addContentToFile(filePath, content)<\/code>: if the file doesn't exist, create it containing <code>content<\/code>\n(creating any missing parent directories). If it exists, append <code>content<\/code> to the end.<\/li>\n<li><code>readContentFromFile(filePath)<\/code>: return the file's full content.<\/li>\n<\/ul>\n<p>Every call is valid: you'll never read a missing file, and a file and a directory never share the same path.\nTests call methods in order, LeetCode style.<\/p>\n<p class=\"ex-title\">Example 1:<\/p><pre class=\"example\"><b>Input:<\/b>\n[\"FileSystem\", \"mkdir\", \"addContentToFile\", \"ls\", \"ls\", \"readContentFromFile\"]\n[[], [\"/docs/notes\"], [\"/docs/todo\", \"buy milk\"], [\"/docs\"], [\"/docs/todo\"], [\"/docs/todo\"]]\n<b>Output:<\/b>\n[null, null, null, [\"notes\", \"todo\"], [\"todo\"], \"buy milk\"]<\/pre><p class=\"ex-title\">Example 2:<\/p><pre class=\"example\"><b>Input:<\/b>\n[\"FileSystem\", \"ls\", \"addContentToFile\", \"addContentToFile\", \"readContentFromFile\", \"ls\"]\n[[], [\"/\"], [\"/a\", \"hi\"], [\"/a\", \" there\"], [\"/a\"], [\"/\"]]\n<b>Output:<\/b>\n[null, [], null, null, \"hi there\", [\"a\"]]<\/pre><p class='ex-title'>Constraints:<\/p><ul><li><code>1 &lt;= path.length, filePath.length &lt;= 100<\/code><\/li><li><code>1 &lt;= content.length &lt;= 50<\/code><\/li><li><code>Up to 300 calls in total<\/code><\/li><\/ul>"}, {"id": "1229", "title": "1229. Meeting Scheduler", "difficulty": "Medium", "tags": ["Intervals", "Two pointers"], "kind": "function", "starter": "class Solution:\n    def minAvailableDuration(self, slots1: List[List[int]], slots2: List[List[int]], duration: int) -> List[int]:\n        ", "ref": "\nclass Solution:\n    def minAvailableDuration(self, slots1, slots2, duration):\n        slots1.sort()\n        slots2.sort()\n        i = j = 0\n        while i < len(slots1) and j < len(slots2):\n            s = max(slots1[i][0], slots2[j][0])\n            e = min(slots1[i][1], slots2[j][1])\n            if e - s >= duration:\n                return [s, s + duration]\n            if slots1[i][1] < slots2[j][1]:\n                i += 1\n            else:\n                j += 1\n        return []\n", "brute": "\nclass Solution:\n    def minAvailableDuration(self, slots1, slots2, duration):\n        best = None\n        for a, b in slots1:\n            for c, d in slots2:\n                s, e = max(a, c), min(b, d)\n                if e - s >= duration and (best is None or s < best):\n                    best = s\n        return [] if best is None else [best, best + duration]\n", "gen": "\ndef _slots(rng, k, hi):\n    cuts = sorted(rng.sample(range(hi), 2 * k))\n    out = [[cuts[2 * i], cuts[2 * i + 1]] for i in range(k)]\n    rng.shuffle(out)\n    return out\n\ndef gen(rng):\n    return [_slots(rng, rng.randint(1, 5), 60), _slots(rng, rng.randint(1, 5), 60), rng.randint(1, 15)]\n\ndef perf(rng):\n    return [_slots(rng, 10000, 10**9), _slots(rng, 10000, 10**9), rng.randint(10**5, 10**6)]\n", "stress": 100, "perf": 1, "tests": [{"name": "Example 1", "example": true, "args": [[[30, 60], [5, 20]], [[10, 40], [50, 70]], 10], "expected": [10, 20]}, {"name": "Example 2", "example": true, "args": [[[0, 5], [20, 25]], [[5, 10], [22, 24]], 3], "expected": []}, {"name": "Touching slots don't overlap", "args": [[[0, 10]], [[10, 20]], 1], "expected": []}, {"name": "Overlap exactly fits", "args": [[[0, 10]], [[4, 20]], 6], "expected": [4, 10]}, {"name": "Earliest of several", "args": [[[50, 80], [0, 30]], [[60, 90], [20, 40]], 5], "expected": [20, 25]}, {"name": "Unsorted input", "args": [[[100, 200], [10, 50], [60, 90]], [[70, 120], [0, 15]], 20], "expected": [70, 90]}, {"name": "One long slot", "args": [[[0, 1000000000]], [[5, 7], [999999990, 1000000000]], 3], "expected": [999999990, 999999993]}], "hint": "Sort both lists, then walk them with two pointers. Two slots overlap on [max(starts), min(ends)]. After checking a pair, move the pointer whose slot ends first.", "method": "minAvailableDuration", "cls": null, "params": ["slots1", "slots2", "duration"], "description": "\n<p>Two people each have a list of free time slots, where each slot is <code>[start, end]<\/code>. A person's own slots\nnever overlap each other, but each list can be in any order.<\/p>\n<p>Given a meeting length <code>duration<\/code>, return the <b>earliest<\/b> time slot <code>[start, start + duration]<\/code>\nwhen both people are free for the whole meeting. If there isn't one, return an empty list.<\/p>\n<p class=\"ex-title\">Example 1:<\/p><pre class=\"example\"><b>Input:<\/b> slots1 = [[30, 60], [5, 20]], slots2 = [[10, 40], [50, 70]], duration = 10\n<b>Output:<\/b> [10, 20]<\/pre><p class=\"ex-title\">Example 2:<\/p><pre class=\"example\"><b>Input:<\/b> slots1 = [[0, 5], [20, 25]], slots2 = [[5, 10], [22, 24]], duration = 3\n<b>Output:<\/b> []<\/pre><p class='ex-title'>Constraints:<\/p><ul><li><code>1 &lt;= slots1.length, slots2.length &lt;= 10<sup>4<\/sup><\/code><\/li><li><code>0 &lt;= start &lt; end &lt;= 10<sup>9<\/sup><\/code><\/li><li><code>1 &lt;= duration &lt;= 10<sup>6<\/sup><\/code><\/li><\/ul>"}]</script>
+<script type="text/plain" id="runner">import copy
+import io
+import json
+import random
+import time
+import traceback
+from contextlib import redirect_stdout
+
+PRELUDE = (
+    "from typing import *\n"
+    "import collections, heapq, math, bisect, itertools, functools\n"
+    "from collections import *\n"
+    "from heapq import *\n"
+)
+PERF_LIMIT_S = 3.0
+
+
+def _load(code, filename="solution.py"):
+    ns = {}
+    exec(PRELUDE, ns)
+    exec(compile(code, filename, "exec"), ns)  # separate compile keeps line numbers matching the editor
+    return ns
+
+
+def _norm(x):
+    if isinstance(x, tuple):
+        x = list(x)
+    if isinstance(x, list):
+        return [_norm(v) for v in x]
+    return x
+
+
+def _call(ns, spec, case):
+    if spec["kind"] == "function":
+        return _norm(getattr(ns["Solution"](), spec["method"])(*copy.deepcopy(case["args"])))
+    obj = ns[spec["cls"]](*copy.deepcopy(case["args"][0]))
+    out = [None]
+    for op, a in zip(case["ops"][1:], case["args"][1:]):
+        out.append(_norm(getattr(obj, op)(*copy.deepcopy(a))))
+    return out
+
+
+def _show(spec, case):
+    if spec["kind"] == "function":
+        text = "\n".join(f"{n} = {json.dumps(v)}" for n, v in zip(spec["params"], case["args"]))
+    else:
+        text = json.dumps(case["ops"]) + "\n" + json.dumps(case["args"])
+    return text if len(text) <= 1500 else text[:1500] + " ... (truncated)"
+
+
+def _short(v):
+    s = json.dumps(v)
+    return s if len(s) <= 1500 else s[:1500] + " ... (truncated)"
+
+
+def run_tests(spec, user_code, mode, seed):
+    started = time.perf_counter()
+    try:
+        user = _load(user_code)
+    except Exception:
+        return {"status": "Compile Error", "error": traceback.format_exc(limit=0)}
+
+    cases = [dict(c) for c in spec["tests"] if mode == "submit" or c.get("example")]
+    if mode == "submit":
+        brute = _load(spec["brute"])
+        ref = _load(spec["ref"])
+        gen = _load(spec["gen"])
+        rng = random.Random(seed)
+        for i in range(spec["stress"]):
+            c = gen["gen"](rng)
+            c = {"args": c} if spec["kind"] == "function" else {"ops": c[0], "args": c[1]}
+            c["name"] = f"Random test {i + 1} (seed {seed})"
+            c["expected"] = _call(brute, spec, c)
+            cases.append(c)
+        prng = random.Random(1234)
+        for j in range(spec.get("perf", 0)):
+            c = gen["perf"](prng)
+            c = {"args": c} if spec["kind"] == "function" else {"ops": c[0], "args": c[1]}
+            c["name"] = f"Large input {j + 1}"
+            c["perf"] = True
+            c["expected"] = _call(ref, spec, c)
+            cases.append(c)
+
+    results = []
+    passed = 0
+    for c in cases:
+        buf = io.StringIO()
+        t0 = time.perf_counter()
+        try:
+            with redirect_stdout(buf):
+                got = _call(user, spec, c)
+            err = None
+        except Exception:
+            got, err = None, traceback.format_exc(limit=-3)
+        took = time.perf_counter() - t0
+        stdout = buf.getvalue()[-2000:]
+        if err:
+            status = "Runtime Error"
+        elif c.get("perf") and took > PERF_LIMIT_S:
+            status = "Time Limit Exceeded"
+        elif got != c["expected"]:
+            status = "Wrong Answer"
+        else:
+            status = "Passed"
+        r = {"name": c["name"], "status": status, "input": _show(spec, c),
+             "expected": _short(c["expected"]), "got": None if err else _short(got),
+             "stdout": stdout, "error": err, "ms": round(took * 1000, 1)}
+        if status == "Passed":
+            passed += 1
+            if mode == "run":
+                results.append(r)
+        else:
+            results.append(r)
+            if mode == "submit":
+                return {"status": status, "passed": passed, "total": len(cases),
+                        "failure": r, "ms": round((time.perf_counter() - started) * 1000)}
+    if mode == "run":
+        overall = "Passed" if passed == len(cases) else next(r["status"] for r in results if r["status"] != "Passed")
+        return {"status": overall, "passed": passed, "total": len(cases), "results": results,
+                "ms": round((time.perf_counter() - started) * 1000)}
+    return {"status": "Accepted", "passed": passed, "total": len(cases),
+            "ms": round((time.perf_counter() - started) * 1000)}
+</script>
+<script type="text/plain" id="worker-src">
+const PYO = "https://cdn.jsdelivr.net/npm/pyodide@0.26.4/";
+importScripts(PYO + "pyodide.js");
+const pyReady = loadPyodide({ indexURL: PYO });
+self.onmessage = async (e) => {
+  const m = e.data;
+  const py = await pyReady;
+  if (m.type === "init") {
+    py.runPython(m.runner);
+    self.postMessage({ type: "ready" });
+    return;
+  }
+  try {
+    py.globals.set("_args_json", JSON.stringify({ spec: m.spec, code: m.code, mode: m.mode, seed: m.seed }));
+    const out = py.runPython("import json as _j\n_a = _j.loads(_args_json)\n_j.dumps(run_tests(_a['spec'], _a['code'], _a['mode'], _a['seed']))");
+    self.postMessage({ type: "result", id: m.id, result: JSON.parse(out) });
+  } catch (err) {
+    self.postMessage({ type: "result", id: m.id, result: { status: "Internal Error", error: String(err) } });
+  }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script>
+const PROBLEMS = JSON.parse(document.getElementById("data").textContent);
+const RUNNER = document.getElementById("runner").textContent;
+const workerURL = URL.createObjectURL(new Blob([document.getElementById("worker-src").textContent], { type: "text/javascript" }));
+const TIME_LIMIT_MS = 15000;
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+};
+
+let current = 0, worker = null, ready = false, runId = 0, timer = null;
+
+const editor = CodeMirror.fromTextArea($("code"), {
+  mode: "python", theme: "material-darker", lineNumbers: true, indentUnit: 4, tabSize: 4,
+  indentWithTabs: false, matchBrackets: true, autoCloseBrackets: true,
+  extraKeys: {
+    Tab: (cm) => cm.somethingSelected() ? cm.indentSelection("add") : cm.replaceSelection("    ", "end"),
+    "Shift-Tab": (cm) => cm.indentSelection("subtract"),
+    "Ctrl-Enter": () => run("submit"), "Cmd-Enter": () => run("submit"),
+    "Ctrl-'": () => run("run"), "Cmd-'": () => run("run"),
+  },
+});
+editor.setSize("100%", "100%");
+editor.on("change", () => store.set("pp-code-" + PROBLEMS[current].id, editor.getValue()));
+
+function esc(s) { return String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+function renderTabs() {
+  $("tabs").innerHTML = "";
+  PROBLEMS.forEach((p, i) => {
+    const b = document.createElement("button");
+    b.className = "tab" + (i === current ? " active" : "");
+    const col = { Easy: "var(--easy)", Medium: "var(--medium)", Hard: "var(--hard)" }[p.difficulty];
+    const solved = store.get("pp-solved-" + p.id) === "1";
+    b.innerHTML = `<span class="dot" style="background:${col}"></span>${esc(p.title)}${solved ? '<span class="done">✓</span>' : ""}`;
+    b.onclick = () => select(i);
+    $("tabs").appendChild(b);
+  });
+}
+
+function select(i) {
+  current = i;
+  store.set("pp-current", String(i));
+  const p = PROBLEMS[i];
+  $("title").textContent = p.title;
+  $("meta").innerHTML = `<span class="pill ${p.difficulty}">${p.difficulty}</span>` + p.tags.map((t) => `<span class="pill">${esc(t)}</span>`).join("");
+  $("desc").innerHTML = p.description;
+  $("hint").textContent = p.hint;
+  $("solution").textContent = p.ref.trim();
+  $("solution").style.display = "none";
+  document.querySelectorAll("details").forEach((d) => (d.open = false));
+  $("left").scrollTop = 0;
+  editor.setValue(store.get("pp-code-" + p.id) ?? p.starter);
+  editor.setCursor(editor.lineCount(), 0);
+  $("console").innerHTML = '<p class="hintline">Write your solution, then <b>Run</b> the examples or <b>Submit</b> for every test.</p>';
+  renderTabs();
+  editor.focus();
+}
+
+function setReady(r, msg) {
+  ready = r;
+  $("runBtn").disabled = !r;
+  $("submitBtn").disabled = !r;
+  $("status").textContent = msg;
+}
+
+function startWorker() {
+  if (worker) worker.terminate();
+  setReady(false, "Loading Python (about 10 s the first time)…");
+  worker = new Worker(workerURL);
+  worker.onmessage = (e) => {
+    const m = e.data;
+    if (m.type === "ready") setReady(true, "Python ready");
+    if (m.type === "result" && m.id === runId) {
+      clearTimeout(timer);
+      setReady(true, "Python ready");
+      show(m.result, m.mode);
+    }
+  };
+  worker.onerror = (e) => setReady(false, "Couldn't load Python. Check your internet connection and reload.");
+  worker.postMessage({ type: "init", runner: RUNNER });
+}
+
+function run(mode) {
+  if (!ready) return;
+  const p = PROBLEMS[current];
+  runId += 1;
+  const id = runId;
+  setReady(false, mode === "submit" ? "Submitting…" : "Running…");
+  $("console").innerHTML = `<p class="hintline">${mode === "submit" ? "Running all tests…" : "Running examples…"}</p>`;
+  const spec = { kind: p.kind, method: p.method, cls: p.cls, params: p.params, tests: p.tests,
+                 ref: p.ref, brute: p.brute, gen: p.gen, stress: p.stress, perf: p.perf };
+  worker.postMessage({ type: "run", id, spec, code: editor.getValue(), mode, seed: mode === "submit" ? Math.floor(Math.random() * 1e6) : 0 });
+  timer = setTimeout(() => {
+    if (id !== runId) return;
+    $("console").innerHTML = `<div class="res-head bad">Time Limit Exceeded</div>
+      <p class="hintline">Your code ran for more than ${TIME_LIMIT_MS / 1000} seconds. Look for an infinite loop, or a solution that's too slow for the large input.</p>`;
+    startWorker();
+  }, TIME_LIMIT_MS);
+}
+
+function caseBlock(r) {
+  let h = `<div class="lbl">Input</div><pre>${esc(r.input)}</pre>`;
+  if (r.error) h += `<div class="lbl">Error</div><pre class="bad">${esc(r.error)}</pre>`;
+  else h += `<div class="lbl">Output</div><pre class="${r.status === "Passed" ? "" : "bad"}">${esc(r.got)}</pre>`;
+  h += `<div class="lbl">Expected</div><pre>${esc(r.expected)}</pre>`;
+  if (r.stdout) h += `<div class="lbl">Stdout</div><pre>${esc(r.stdout)}</pre>`;
+  return h;
+}
+
+function show(res) {
+  const c = $("console");
+  if (res.status === "Compile Error" || res.status === "Internal Error") {
+    c.innerHTML = `<div class="res-head bad">${res.status}</div><div class="case"><pre class="bad">${esc(res.error)}</pre></div>`;
+    return;
+  }
+  if (res.results) {  // Run mode
+    const allOk = res.status === "Passed";
+    let h = `<div class="res-head ${allOk ? "ok" : "bad"}">${allOk ? "Accepted" : esc(res.status)}<span class="sub">${res.passed}/${res.total} examples · ${res.ms} ms</span></div>`;
+    h += '<div class="casetabs">' + res.results.map((r, i) =>
+      `<button class="casetab${i === 0 ? " active" : ""}" data-i="${i}"><span class="${r.status === "Passed" ? "ok" : "bad"}">●</span> ${esc(r.name)}</button>`).join("") + "</div>";
+    h += res.results.map((r, i) => `<div class="case" data-case="${i}" style="${i ? "display:none" : ""}">${caseBlock(r)}</div>`).join("");
+    c.innerHTML = h;
+    c.querySelectorAll(".casetab").forEach((b) => (b.onclick = () => {
+      c.querySelectorAll(".casetab").forEach((x) => x.classList.toggle("active", x === b));
+      c.querySelectorAll(".case").forEach((x) => (x.style.display = x.dataset.case === b.dataset.i ? "" : "none"));
+    }));
+    return;
+  }
+  if (res.status === "Accepted") {
+    store.set("pp-solved-" + PROBLEMS[current].id, "1");
+    renderTabs();
+    c.innerHTML = `<div class="res-head ok">Accepted<span class="sub">${res.passed}/${res.total} testcases passed · ${res.ms} ms</span></div>
+      <p class="hintline">Every test passed, including the random and large inputs. Log it in your tracker, then compare with the reference solution.</p>`;
+    return;
+  }
+  const f = res.failure;
+  c.innerHTML = `<div class="res-head bad">${esc(res.status)}<span class="sub">${res.passed}/${res.total} testcases passed</span></div>
+    <div class="case"><div class="lbl">Failed on: ${esc(f.name)}${f.ms ? ` · ${f.ms} ms` : ""}</div>${caseBlock(f)}</div>`;
+}
+
+$("runBtn").onclick = () => run("run");
+$("submitBtn").onclick = () => run("submit");
+$("reset").onclick = () => {
+  if (confirm("Reset to the starter code? Your current code for this problem will be lost.")) editor.setValue(PROBLEMS[current].starter);
+};
+$("showSol").onclick = () => { $("solution").style.display = "block"; };
+
+(() => {  // draggable divider
+  const g = $("gutter"), left = $("left");
+  g.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    const move = (ev) => {
+      const pct = Math.min(70, Math.max(20, (ev.clientX / window.innerWidth) * 100));
+      left.style.width = pct + "%";
+      editor.refresh();
+    };
+    const up = () => { document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up); };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  });
+})();
+
+const hashIndex = () => PROBLEMS.findIndex((p) => "p" + p.id === location.hash.slice(1));
+const saved = parseInt(store.get("pp-current") || "0", 10) || 0;
+select(hashIndex() >= 0 ? hashIndex() : Math.min(PROBLEMS.length - 1, saved));
+window.addEventListener("hashchange", () => { if (hashIndex() >= 0 && hashIndex() !== current) select(hashIndex()); });
+startWorker();
+</script>
+</body>
+</html>
