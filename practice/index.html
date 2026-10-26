@@ -20,7 +20,24 @@
   header { height: 48px; display: flex; align-items: center; gap: 6px; padding: 0 12px; background: var(--panel);
            border-bottom: 1px solid var(--line); flex: none; }
   header .brand { font-weight: 700; margin-right: 12px; white-space: nowrap; }
-  #tabs { display: flex; gap: 6px; overflow-x: auto; min-width: 0; flex: 1; scrollbar-width: thin; }
+  .picker { position: relative; }
+  .menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; min-width: 340px; max-width: 90vw; padding: 6px;
+          background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px #0006;
+          display: flex; flex-direction: column; gap: 2px; }
+  .menu[hidden] { display: none; }
+  .menu .tab { text-align: left; width: 100%; }
+  .tab.arrow { font-size: 18px; line-height: 1; padding: 4px 10px; }
+  .tab:disabled { opacity: .35; cursor: default; background: transparent; }
+  @media (max-width: 760px) {
+    body { overflow: auto; }
+    header .brand, #status { display: none; }
+    main { flex-direction: column; gap: 8px; }
+    #left { width: 100% !important; max-height: 45vh; }
+    #gutter { display: none; }
+    #editorCard { height: 60vh; flex: none; }
+    #consoleCard { height: auto; min-height: 160px; }
+    .menu { min-width: 0; width: calc(100vw - 24px); }
+  }
   .tab { background: transparent; color: var(--muted); border: 1px solid transparent; border-radius: 6px; padding: 5px 10px;
          cursor: pointer; font: inherit; white-space: nowrap; }
   .tab:hover { background: var(--panel2); color: var(--text); }
@@ -81,7 +98,12 @@
 <body>
 <header>
   <span class="brand">Premium Practice</span>
-  <nav id="tabs"></nav>
+  <div class="picker">
+    <button class="tab" id="listBtn" aria-haspopup="true" aria-expanded="false">☰ Problems</button>
+    <div class="menu" id="list" hidden></div>
+  </div>
+  <button class="tab arrow" id="prevBtn" title="Previous problem" aria-label="Previous problem">‹</button>
+  <button class="tab arrow" id="nextBtn" title="Next problem" aria-label="Next problem">›</button>
   <span id="status">Loading Python…</span>
 </header>
 <main>
@@ -296,17 +318,38 @@ editor.on("change", () => store.set("pp-code-" + PROBLEMS[current].id, editor.ge
 function esc(s) { return String(s ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
 
 function renderTabs() {
-  $("tabs").innerHTML = "";
+  const list = $("list");
+  list.innerHTML = "";
   PROBLEMS.forEach((p, i) => {
     const b = document.createElement("button");
     b.className = "tab" + (i === current ? " active" : "");
     const col = { Easy: "var(--easy)", Medium: "var(--medium)", Hard: "var(--hard)" }[p.difficulty];
     const solved = store.get("pp-solved-" + p.id) === "1";
     b.innerHTML = `<span class="dot" style="background:${col}"></span>${esc(p.title)}${solved ? '<span class="done">✓</span>' : ""}`;
-    b.onclick = () => select(i);
-    $("tabs").appendChild(b);
+    b.onclick = () => { closeList(); go(i); };
+    list.appendChild(b);
   });
+  $("listBtn").textContent = `☰ Problems (${current + 1}/${PROBLEMS.length})`;
+  $("prevBtn").disabled = current === 0;
+  $("nextBtn").disabled = current === PROBLEMS.length - 1;
 }
+
+function go(i) {
+  if (i < 0 || i >= PROBLEMS.length) return;
+  history.replaceState(null, "", "#p" + PROBLEMS[i].id);  // keep the link pointing at the open problem
+  select(i);
+}
+function closeList() { $("list").hidden = true; $("listBtn").setAttribute("aria-expanded", "false"); }
+$("listBtn").onclick = (e) => {
+  e.stopPropagation();
+  const open = $("list").hidden;
+  $("list").hidden = !open;
+  $("listBtn").setAttribute("aria-expanded", String(open));
+};
+document.addEventListener("click", (e) => { if (!$("list").contains(e.target)) closeList(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeList(); });
+$("prevBtn").onclick = () => go(current - 1);
+$("nextBtn").onclick = () => go(current + 1);
 
 function select(i) {
   current = i;
